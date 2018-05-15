@@ -17,7 +17,7 @@ class Plugin extends PluginBase
      */
 
     public $elevated = true;
-    
+
     /**
      * Returns information about this plugin.
      *
@@ -39,6 +39,11 @@ class Plugin extends PluginBase
      */
     public function boot()
     {
+        // Only load debugbar in development environment
+        if (env('APP_ENV') !== 'development') {
+            return;
+        }
+
         // Service provider
         App::register('\Barryvdh\Debugbar\ServiceProvider');
 
@@ -53,11 +58,6 @@ class Plugin extends PluginBase
 
         Event::listen('cms.page.beforeDisplay', function($controller, $url, $page)
         {
-            // Only show for authenticated backend users
-            if (!BackendAuth::check()) {
-                Debugbar::disable();
-            }
-
             // Twig extensions
             $twig = $controller->getTwig();
             if(!$twig->hasExtension(\Barryvdh\Debugbar\Twig\Extension\Debug::class)){
